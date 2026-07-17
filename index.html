@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu Orientador Online ETPMA</title>
+    <!-- Tailwind CSS para diseño moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Librerías para exportar a PDF, Imagen PNG y Excel de forma nativa -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Fusiona el fondo blanco de los logos con el fondo del contenedor */
+        .logo-blend {
+            mix-blend-mode: multiply;
+        }
+        /* Patrón geométrico digital para el fondo del panel motivacional */
+        .tech-pattern {
+            background-image: radial-gradient(rgba(56, 189, 248, 0.15) 1px, transparent 0);
+            background-size: 16px 16px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Tarjeta Principal de Gran Presencia -->
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden border border-slate-200">
+        
+        <!-- Encabezado de Dos Columnas -->
+        <div class="bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white relative grid grid-cols-1 md:grid-cols-12 border-b-4 border-sky-500">
+            
+            <!-- Bloque Izquierdo: Identidad de la App -->
+            <div class="md:col-span-7 p-8 flex flex-col sm:flex-row items-center gap-6">
+                <div class="w-24 h-28 bg-[#f8fafc] p-2.5 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+                    <img src="logo.jpg" alt="Escudo E.T.P. María Auxiliadora" class="max-w-full max-h-full object-contain logo-blend">
+                </div>
+                
+                <div class="text-center sm:text-left flex-grow">
+                    <div class="text-[10px] bg-sky-500/20 text-sky-300 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-widest inline-block mb-2">
+                        E.T.P. María Auxiliadora • Altamira
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl font-black tracking-tight leading-none uppercase">
+                        <span class="text-white text-2xl sm:text-3xl">Tu Orientador</span><br>
+                        <span class="bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-blue-400 to-indigo-300">
+                            Online ETPMA
+                        </span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 mt-2 font-medium tracking-wide uppercase">Encuentra tu camino en Salud o Economía Social</p>
+                </div>
+            </div>
+
+            <!-- Bloque Derecho: Ilustración Digital y Frase Motivacional -->
+            <div class="md:col-span-5 border-t md:border-t-0 md:border-l border-slate-700/50 relative overflow-hidden flex items-center justify-center p-6 min-h-[140px] md:min-h-0 tech-pattern">
+                <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-sky-500/20 rounded-full blur-3xl"></div>
+                <div class="absolute -left-10 -top-10 w-32 h-32 bg-indigo-500/20 rounded-full blur-3xl"></div>
+                
+                <div class="text-center md:text-left z-10 max-w-xs">
+                    <div class="flex items-center justify-center md:justify-start gap-2 text-sky-400 mb-1.5 font-bold text-xs uppercase tracking-widest">
+                        <span class="animate-pulse">⚡</span> <span id="motivo-tag">Área de Inspiración</span>
+                    </div>
+                    <p id="motivo-texto" class="text-xs text-slate-300 italic font-medium leading-relaxed">
+                        "El único modo de hacer un gran trabajo es amar lo que haces. Tu futuro profesional empieza con la decisión que tomas hoy."
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla 1: Registro del Estudiante -->
+        <div id="pantalla-registro" class="p-8">
+            <h2 class="text-xl font-bold text-slate-800 mb-2">¡Bienvenido al portal del futuro! 🚀</h2>
+            <p class="text-slate-600 text-sm mb-6">Este test interactivo te guiará para conocer cuál de nuestras menciones técnicas se conecta mejor con tu personalidad, habilidades y metas. ¡Comencemos!</p>
+            
+            <!-- Mensaje de error/alerta si ya presentó -->
+            <div id="alerta-duplicado" class="hidden mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                <div class="flex items-start">
+                    <div class="text-amber-500 text-xl mr-3">⚠️</div>
+                    <div>
+                        <h4 class="text-sm font-bold text-amber-800">Evaluación ya registrada</h4>
+                        <p class="text-xs text-amber-700 mt-1" id="alerta-duplicado-mensaje">Este número de cédula ya completó su prueba. Por favor, comunícate con tu orientador o docente si necesitas consultar tus resultados.</p>
+                    </div>
+                </div>
+            </div>
+
+            <form id="formulario-registro" onsubmit="iniciarTest(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nombre y Apellido del Estudiante</label>
+                    <input type="text" id="nombre" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none transition text-sm">
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Cédula o ID escolar</label>
+                        <input type="text" id="cedula" oninput="ocultarAlerta()" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Edad</label>
+                        <input type="number" id="edad" min="10" max="18" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Sección</label>
+                        <select id="seccion" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none transition text-sm">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-6 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-black py-3.5 px-6 rounded-xl shadow-lg shadow-sky-500/20 transition duration-300 transform hover:-translate-y-0.5 text-sm uppercase tracking-wider">
+                    Iniciar mi Exploración 🔥
+                </button>
+            </form>
+
+            <!-- Cinta Institucional del Lema -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex justify-center">
+                <div class="w-full bg-[#fcfcfc] rounded-2xl p-4 border border-slate-150/80 shadow-sm flex items-center justify-center transition-all hover:shadow-md">
+                    <img src="lema.jpg" alt="Lema Institucional" class="w-full h-auto max-h-24 md:max-h-28 object-contain logo-blend">
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla 2: El Test -->
+        <div id="pantalla-test" class="p-8 hidden">
+            <div class="mb-6">
+                <div class="flex justify-between text-xs text-slate-500 mb-1">
+                    <span id="progreso-texto" class="font-bold">Pregunta 1 de 12</span>
+                    <span id="progreso-porcentaje" class="text-sky-500 font-bold">0% Completado</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2.5">
+                    <div id="barra-progreso" class="bg-sky-500 h-2.5 rounded-full transition-all duration-300" style="width: 8%;"></div>
+                </div>
+            </div>
+
+            <h3 id="pregunta-titulo" class="text-lg font-bold text-slate-800 mb-6 leading-snug">Aquí va la pregunta</h3>
+            <div id="opciones-contenedor" class="space-y-3"></div>
+        </div>
+
+        <!-- Pantalla 3: Resultados -->
+        <div id="pantalla-resultados" class="p-8 hidden">
+            <div class="text-center mb-6">
+                <span class="text-5xl animate-bounce inline-block">🎉</span>
+                <h2 class="text-2xl font-black text-slate-800 mt-3">¡Test Completado, <span id="resultado-nombre" class="text-sky-500">Estudiante</span>!</h2>
+                <p class="text-slate-500 text-sm mt-1">Aquí tienes tu perfil vocacional sugerido según tus respuestas.</p>
+            </div>
+
+            <!-- Diagnóstico de Especialidades -->
+            <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-6">
+                <h3 class="text-sm font-black text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    📊 Tu porcentaje de afinidad con nuestras áreas:
+                </h3>
+                
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>ÁREA DE LA SALUD (ENFERMERÍA / REGISTRO)</span>
+                            <span id="porcentaje-salud" class="text-emerald-600 font-extrabold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3">
+                            <div id="barra-salud" class="bg-emerald-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>ÁREA DE ECONOMÍA SOCIAL (ADMON / CONTABILIDAD)</span>
+                            <span id="porcentaje-economia" class="text-amber-600 font-extrabold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3">
+                            <div id="barra-economia" class="bg-amber-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div id="diagnostico-alternativo-contenedor" class="hidden">
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>OTRAS ÁREAS (TECNOLOGÍA, ARTES, EDUCACIÓN, MECÁNICA)</span>
+                            <span id="porcentaje-otros" class="text-blue-600 font-extrabold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-3">
+                            <div id="barra-otros" class="bg-blue-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sugerencia Específica -->
+            <div class="border-t border-slate-100 pt-4 mb-6">
+                <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Mención Especializada Recomendada:</h4>
+                <div id="mencion-tarjeta" class="p-5 rounded-2xl bg-[#f8fafc] border-2 border-sky-100">
+                    <h5 id="mencion-titulo" class="font-extrabold text-lg text-sky-950">Mención</h5>
+                    <p id="mencion-descripcion" class="text-xs text-slate-600 mt-2 leading-relaxed">Descripción adaptada...</p>
+                </div>
+            </div>
+
+            <!-- Botones de Acción Estudiantes (PDF e Imagen PNG descargable) -->
+            <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="reiniciarTest()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 px-4 rounded-xl transition text-sm">
+                    Repetir Test 🔄
+                </button>
+                <button onclick="descargarReportePNG()" class="flex-1 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 text-white font-extrabold py-3.5 px-4 rounded-xl transition text-sm shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2">
+                    📥 Guardar como Imagen (PNG)
+                </button>
+                <button onclick="generarReportePDF()" class="flex-1 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 text-white font-extrabold py-3.5 px-4 rounded-xl transition text-sm shadow-md shadow-blue-500/20 flex items-center justify-center gap-2">
+                    📄 Descargar PDF
+                </button>
+            </div>
+        </div>
+
+        <!-- Zona de Uso del Orientador -->
+        <div class="bg-slate-50 p-4 border-t border-slate-100 flex justify-between items-center text-[11px] text-slate-400">
+            <span>Uso exclusivo del Orientador Educativo</span>
+            <button onclick="descargarExcelCompleto()" class="text-sky-600 hover:text-sky-800 underline font-bold transition flex items-center gap-1">
+                📊 Descargar Base de Datos (Excel)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ================= CONTENEDOR OPTIMIZADO PARA GENERACIÓN DE ARCHIVOS (PDF e Imagen) ================= -->
+    <div id="plantilla-pdf" class="hidden">
+        <div id="captura-contenedor" style="padding: 24px; font-family: 'Poppins', sans-serif; color: #1e293b; background-color: #ffffff; width: 196mm; min-height: 256mm; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
+            
+            <div>
+                <!-- Cabecera Oficial ETPMA -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0ea5e9; padding-bottom: 12px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="logo.jpg" style="height: 55px; width: auto;" alt="Escudo">
+                        <div>
+                            <h4 style="margin: 0; font-size: 9px; color: #64748b; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;">E.T.P. María Auxiliadora</h4>
+                            <h1 style="margin: 0; font-size: 16px; color: #0f172a; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px;">Reporte de Orientación Vocacional</h1>
+                        </div>
+                    </div>
+                    <img src="lema.jpg" style="height: 40px; width: auto;" alt="Lema">
+                </div>
+
+                <!-- Ficha del Estudiante -->
+                <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 11px;">
+                    <p style="margin: 0;"><strong>Estudiante:</strong> <span id="pdf-nombre"></span></p>
+                    <p style="margin: 0;"><strong>Cédula:</strong> <span id="pdf-cedula"></span></p>
+                    <p style="margin: 0;"><strong>Edad:</strong> <span id="pdf-edad"></span> años</p>
+                    <p style="margin: 0;"><strong>Sección:</strong> <span id="pdf-seccion"></span></p>
+                    <p style="margin: 0; grid-column: span 2; border-top: 1px solid #f1f5f9; padding-top: 4px; color: #64748b;"><strong>Fecha de Evaluación:</strong> <span id="pdf-fecha"></span></p>
+                </div>
+
+                <!-- Porcentajes de Afinidad -->
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 11px; color: #334155; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; letter-spacing: 0.5px;">📊 Afinidades Registradas en el Test</h3>
+                    
+                    <!-- Barra Salud -->
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; margin-bottom: 3px; text-transform: uppercase;">
+                            <span>Área de la Salud (Enfermería / Registro)</span>
+                            <span id="pdf-porc-salud" style="color: #059669;">0%</span>
+                        </div>
+                        <div style="background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden;">
+                            <div id="pdf-barra-salud" style="background-color: #10b981; height: 100%; width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Barra Economía -->
+                    <div style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; margin-bottom: 3px; text-transform: uppercase;">
+                            <span>Área de Economía Social (Administración / Contabilidad)</span>
+                            <span id="pdf-porc-economia" style="color: #d97706;">0%</span>
+                        </div>
+                        <div style="background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden;">
+                            <div id="pdf-barra-economia" style="background-color: #f59e0b; height: 100%; width: 0%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Barra Otros -->
+                    <div id="pdf-otros-contenedor" style="margin-bottom: 10px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; margin-bottom: 3px; text-transform: uppercase;">
+                            <span>Orientación a Otras Áreas Técnicas</span>
+                            <span id="pdf-porc-otros" style="color: #2563eb;">0%</span>
+                        </div>
+                        <div style="background-color: #e2e8f0; border-radius: 9999px; height: 8px; overflow: hidden;">
+                            <div id="pdf-barra-otros" style="background-color: #3b82f6; height: 100%; width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sugerencia y Recomendación -->
+                <div id="pdf-decoracion-borde" style="border: 2px dashed #0ea5e9; background-color: #f0f9ff; border-radius: 12px; padding: 16px; text-align: center;">
+                    <span style="font-size: 20px;">⭐</span>
+                    <h2 style="font-size: 13px; font-weight: 900; color: #0369a1; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px;">Recomendación del Orientador</h2>
+                    <h3 id="pdf-mencion-titulo" style="font-size: 12px; font-weight: 800; color: #0f172a; margin-top: 4px;">Mención sugerida aquí</h3>
+                    <p id="pdf-mencion-desc" style="font-size: 10px; color: #475569; line-height: 1.5; margin-top: 8px; text-align: justify; padding: 0 5px;"></p>
+                </div>
+            </div>
+
+            <!-- Pie del Reporte -->
+            <div style="text-align: center; font-size: 8px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 20px;">
+                Este documento es una guía psicopedagógica preliminar para ser conversada entre el estudiante y su representante.<br>
+                <strong>"Buenos Cristianos, Honestos Ciudadanos y Profesionales de Calidad al Servicio de la Vida."</strong>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script de lógica de la aplicación -->
+    <script>
+        // Preguntas Contextualizadas a Petare-Altamira
+        const preguntas = [
+            {
+                id: 1,
+                pregunta: "Si en el sector donde vives (como Petare, La Dolorita o El Centro) se organiza una jornada de salud vecinal para la comunidad, ¿con qué te gustaría colaborar?",
+                opciones: [
+                    { texto: "Ayudando en la mesa de triaje a medir la tensión de los abuelitos y vecinos.", valor: "enfermeria" },
+                    { texto: "Llenando de forma ordenada las fichas y planillas de control para que no se pierda la información.", valor: "registro" },
+                    { texto: "Coordinando la logística del evento, organizando las filas y asignando tareas al equipo de voluntarios.", valor: "administracion" },
+                    { texto: "Llevando el inventario de las medicinas y materiales donados, asegurando que cuadren las cuentas.", valor: "contabilidad" },
+                    { texto: "Me ofrecería para reparar el sistema de sonido del evento o diseñar la publicidad digital de la jornada.", valor: "otros" }
+                ]
+            },
+            {
+                id: 2,
+                pregunta: "Subiendo de Petare a Altamira en transporte público (Metro o camioneta), observas que un pasajero de la tercera edad empieza a sentirse mareado y sofocado. ¿Qué harías?",
+                opciones: [
+                    { texto: "Me acerco con calma, le doy aire, busco ofrecerle agua y vigilo sus signos para ayudarle a reincorporarse.", valor: "enfermeria" },
+                    { texto: "Pido ayuda para bajar en la estación más cercana y busco de inmediato al personal de seguridad del Metro para registrar el reporte.", valor: "registro" },
+                    { texto: "Tomo la iniciativa para que los demás abran espacio, organizo a la gente para que no se aglomere y pido el asiento al chofer.", valor: "administracion" },
+                    { texto: "Verifico rápidamente si el señor lleva consigo un carnet de control médico o recetas para saber si necesita una medicina exacta.", valor: "contabilidad" },
+                    { texto: "Trataría de distraer al señor hablándole de otros temas o ideando un aparato portátil de ventilación para las unidades de transporte.", valor: "otros" }
+                ]
+            },
+            {
+                id: 3,
+                pregunta: "Si un grupo de jóvenes decide crear un emprendimiento familiar para vender almuerzos o postres en su comunidad, ¿cuál de estas tareas elegirías?",
+                opciones: [
+                    { texto: "Asegurarme de que la preparación cumpla con normas de higiene rigurosas y que los menús sean nutritivos y balanceados.", valor: "enfermeria" },
+                    { texto: "Diseñar una base de datos para registrar los datos de contacto, gustos y direcciones de entrega de todos los clientes.", valor: "registro" },
+                    { texto: "Contactar a los proveedores de los ingredientes en el mercado, negociar precios y coordinar la entrega de pedidos.", valor: "administracion" },
+                    { texto: "Llevar el libro de ingresos y egresos para calcular el costo exacto por porción y el margen real de ganancia.", valor: "contabilidad" },
+                    { texto: "Estar a cargo del diseño gráfico del menú, la publicidad en Instagram o programar el bot que responda los mensajes.", valor: "otros" }
+                ]
+            },
+            {
+                id: 4,
+                pregunta: "Imagina que en la escuela se va a recuperar un espacio (como la cancha o un aula común) y hay que coordinar los recursos. ¿Qué área preferirías manejar?",
+                opciones: [
+                    { texto: "Establecer las normas de seguridad y salud para evitar accidentes mientras mis compañeros trabajan en la obra.", valor: "enfermeria" },
+                    { texto: "Crear un archivo digital o físico con las actas firmadas y los planos de control del avance de la obra.", valor: "registro" },
+                    { texto: "Dirigir el proyecto general, motivar a los compañeros y supervisar que se cumpla el cronograma.", valor: "administracion" },
+                    { texto: "Administrar el presupuesto asignado para comprar el cemento, pinturas y brochas, buscando los mejores precios del mercado.", valor: "contabilidad" },
+                    { texto: "Realizar la pintura artística de un mural de fondo, instalar los cables de iluminación o soldar las bases dañadas.", valor: "otros" }
+                ]
+            },
+            {
+                id: 5,
+                pregunta: "Cuando trabajas en grupo en el salón de clases, tus compañeros valoran de ti principalmente que eres muy bueno(a):",
+                opciones: [
+                    { texto: "Escuchando con empatía a todos y garantizando un ambiente tranquilo y de cuidado mutuo.", valor: "enfermeria" },
+                    { texto: "Estructurando y guardando ordenadamente los apuntes y las carpetas del proyecto para no perder información.", valor: "registro" },
+                    { texto: "Delegando funciones de forma justa, planificando los tiempos y liderando la exposición.", valor: "administracion" },
+                    { texto: "Calculando y cuadrando los aportes económicos del equipo para comprar las láminas o materiales de forma exacta.", valor: "contabilidad" },
+                    { texto: "Creando cosas totalmente nuevos, programando presentaciones interactivas o arreglando los dispositivos electrónicos del salón.", valor: "otros" }
+                ]
+            },
+            {
+                id: 6,
+                pregunta: "Si tuvieras la oportunidad de hacer un curso gratuito de computación los sábados, ¿cuál de estos contenidos te llamaría más la atención?",
+                opciones: [
+                    { texto: "Manejo de sistemas de información sobre patologías, medicamentos y anatomía humana.", valor: "enfermeria" },
+                    { texto: "Uso avanzado de sistemas de archivos, nubes digitales de datos e historiales clínicos.", valor: "registro" },
+                    { texto: "Herramientas digitales de planificación corporativa, marketing digital y gestión de proyectos.", valor: "administracion" },
+                    { texto: "Fórmulas financieras, macros para contabilidad analítica y cálculo de nóminas en Excel.", valor: "contabilidad" },
+                    { texto: "Aprender a programar videojuegos, reparar piezas internas de computadoras o diseñar interfaces en 3D.", valor: "otros" }
+                ]
+            },
+            {
+                id: 7,
+                pregunta: "Imagina que un familiar te pide ayuda porque tiene un pequeño comercio en el centro de Caracas y no sabe cómo crecer. ¿Qué recomendación le darías?",
+                opciones: [
+                    { texto: "Que empiece por evaluar el bienestar físico, la ergonomía y las condiciones de salud y seguridad de sus empleados.", valor: "enfermeria" },
+                    { texto: "Que cree un registro organizado de fichas de productos y stock digital para evitar pérdidas en almacén.", valor: "registro" },
+                    { texto: "Que redefina su plan de negocios, reasigne roles en su personal y plantee una estrategia de mercadeo atractiva.", valor: "administracion" },
+                    { texto: "Que haga una auditoría completa de los libros de contabilidad para ver a dónde se está yendo el dinero.", valor: "contabilidad" },
+                    { texto: "Que invierta en un sistema automatizado inteligente, robótica básica para empaques o diseño gráfico de su marca.", valor: "otros" }
+                ]
+            },
+            {
+                id: 8,
+                pregunta: "Cuando visitas un hospital o un ambulatorio en el municipio, ¿cuál es el detalle que más te llama la atención observar?",
+                opciones: [
+                    { texto: "La atención, calidez, cuidado y la vocación de servicio del personal de enfermería hacia los pacientes.", valor: "enfermeria" },
+                    { texto: "Cómo clasifican y archivan los expedientes de cada paciente y el control de las citas.", valor: "registro" },
+                    { texto: "El funcionamiento operativo general: cómo se coordinan las secretarias, doctores y directivos.", valor: "administracion" },
+                    { texto: "Los reportes financieros del centro o el proceso de facturación de los insumos médicos.", valor: "contabilidad" },
+                    { texto: "El funcionamiento técnico de los equipos de rayos X, tomógrafos, ecógrafos o el diseño de la infraestructura médica.", valor: "otros" }
+                ]
+            },
+            {
+                id: 9,
+                pregunta: "Si te dieran un fondo para leer o investigar sobre un tema por tu cuenta durante una semana, ¿cuál elegirías con más pasión?",
+                opciones: [
+                    { texto: "Avances científicos en el cuidado intensivo, primeros auxilios, medicamentos y tratamientos de salud.", valor: "enfermeria" },
+                    { texto: "Cómo las bases de datos de salud y la estadística ayudan a detectar a tiempo brotes de virus en las comunidades.", valor: "registro" },
+                    { texto: "Biografías de grandes empresarios que crearon corporaciones de impacto social partiendo de cero.", valor: "administracion" },
+                    { texto: "Principios de economía aplicada, flujo de caja corporativo e impuestos en Venezuela.", valor: "contabilidad" },
+                    { texto: "Manuales de ensamblaje de motores, robótica, desarrollo de aplicaciones móviles o artes audiovisuales.", valor: "otros" }
+                ]
+            },
+            {
+                id: 10,
+                pregunta: "Si pudieras entrevistar a un profesional venezolano destacado para que te explique su trabajo, ¿a quién elegirías?",
+                opciones: [
+                    { texto: "A un enfermero especializado que salva vidas a diario en una sala de emergencias críticas de un hospital de Caracas.", valor: "enfermeria" },
+                    { texto: "A un analista de datos de salud pública que procesa estadísticas vitales de la región.", valor: "registro" },
+                    { texto: "Al director ejecutivo de una empresa de consumo masivo que coordina equipos en todo el país.", valor: "administracion" },
+                    { texto: "A un auditor financiero que ayuda a las PYMES venezolanas a actuar bajo las normativas impositivas de forma óptima.", valor: "contabilidad" },
+                    { texto: "A un ingeniero de telecomunicaciones, desarrollador de software de IA, arquitecto o un gran profesor de educación técnica.", valor: "otros" }
+                ]
+            },
+            {
+                id: 11,
+                pregunta: "En tu tiempo libre en casa, si decides emprender un proyecto personal de fin de semana, ¿cuál se parece más a ti?",
+                opciones: [
+                    { texto: "Hacer un curso virtual de primeros auxilios básicos o aprender sobre nutrición y ejercicios saludables.", valor: "enfermeria" },
+                    { texto: "Organizar minuciosamente mis colecciones, fotos digitales, archivos de la escuela y cuadernos por carpetas lógicas.", valor: "registro" },
+                    { texto: "Organizar un torneo deportivo interbarrios o de videojuegos, redactando las reglas y buscando premios.", valor: "administracion" },
+                    { texto: "Hacer una lista detallada de mis ahorros, ingresos por trabajos puntuales y proyectar mis gastos mensuales.", valor: "contabilidad" },
+                    { texto: "Desarmar y reparar un aparato eléctrico dañado, dibujar digitalmente, escribir cuentos o diseñar animaciones.", valor: "otros" }
+                ]
+            },
+            {
+                id: 12,
+                pregunta: "Para ti, ¿cuál es el principal motor técnico que necesita nuestra sociedad para avanzar firmemente hacia un mejor futuro?",
+                opciones: [
+                    { texto: "Fortalecer el sistema de salud primaria y la atención humanitaria directa para que toda la población esté sana.", valor: "enfermeria" },
+                    { texto: "Mejorar la infraestructura digital y de datos públicos para que la información del país esté segura y organizada.", valor: "registro" },
+                    { texto: "Fomentar el emprendimiento organizado y crear empresas sostenibles que generen empleo formal y coordinado.", valor: "administracion" },
+                    { texto: "Asegurar la total transparencia, auditoría y el control riguroso de cada recurso financiero invertido en el país.", valor: "contabilidad" },
+                    { texto: "Desarrollar tecnología propia de vanguardia (programación, electrónica, mecánica industrial) o impulsar las artes y la educación.", valor: "otros" }
+                ]
+            }
+        ];
+
+        // Perfiles de especialidades
+        const perfiles = {
+            enfermeria: {
+                titulo: "Especialidad: SALUD - Mención Enfermería",
+                descripcion: "Posees una fuerte vocación de servicio, empatía y sensibilidad hacia el cuidado humano. Tu perfil indica una clara inclinación por la atención directa de pacientes, la aplicación de primeros auxilios y la promoción de la salud y prevención comunitaria. Eres el corazón del sistema de salud."
+            },
+            registro: {
+                titulo: "Especialidad: SALUD - Mención Registro y Estadística de Salud",
+                descripcion: "Tu perfil destaca por la precisión, el orden metodológico y la recolección estructurada de datos aplicada al sector salud. Tienes las aptitudes perfectas para gestionar historias clínicas, organizar archivos informáticos médicos y generar las estadísticas vitales que permiten salvar vidas de manera preventiva."
+            },
+            administracion: {
+                titulo: "Especialidad: ECONOMÍA SOCIAL - Mención Administración",
+                descripcion: "Muestras claros rasgos de liderazgo, pensamiento estratégico y organización. Te apasiona coordinar equipos de trabajo, estructurar recursos materiales y planificar estrategias para que emprendimientos y empresas funcionen de manera eficiente y con impacto social."
+            },
+            contabilidad: {
+                titulo: "Especialidad: ECONOMÍA SOCIAL - Mención Contabilidad",
+                descripcion: "Destacas por tu capacidad analítica, estructuración lógica y amor por los cálculos numéricos. Posees el perfil ideal para auditar cuentas, realizar balances, proyectar presupuestos y asegurar la completa transparencia e integridad de las finanzas en cualquier organización."
+            },
+            otros: {
+                titulo: "Perfil Orientado a Otras Ramas Técnicas / Académicas",
+                descripcion: "¡Tu talento es excepcional, pero apunta en una dirección diferente! Tus respuestas indican una marcada afinidad hacia campos como la Ingeniería Tecnológica (Programación, Electrónica, Mecánica), las Artes Creativas, el Diseño Gráfico o la Educación. Debido a esto, te recomendamos conversar con tu representante y con el orientador para conocer otras opciones de Escuelas Técnicas Industriales (E.T.I.), liceos de ciencias puras o colegios de artes que se acoplen perfectamente con tus grandes habilidades."
+            }
+        };
+
+        let estudianteActual = {};
+        let respuestasEstudiante = [];
+        let preguntaActualIdx = 0;
+
+        let baseDatosHistorica = JSON.parse(localStorage.getItem("bd_orientacion_auxiliadora")) || [];
+
+        const frasesMotivacionales = {
+            registro: {
+                tag: "Tu Oportunidad",
+                texto: '"El único modo de hacer un gran trabajo es amar lo que haces. Tu futuro profesional empieza con la decisión que tomas hoy."'
+            },
+            test: {
+                tag: "Sigue Adelante",
+                texto: '"No te detengas. Cada respuesta te acerca más a descubrir el talento único que tienes para transformar tu entorno."'
+            },
+            resultados: {
+                tag: "Meta Alcanzada",
+                texto: '"¡Excelente trabajo! Has completado tu mapa de ruta. Ahora tienes las herramientas para decidir tu camino técnico."'
+            }
+        };
+
+        function actualizarPanelMotivacional(fase) {
+            const data = frasesMotivacionales[fase];
+            document.getElementById("motivo-tag").innerText = data.tag;
+            document.getElementById("motivo-texto").innerText = data.texto;
+        }
+
+        function mostrarPantalla(id) {
+            document.getElementById("pantalla-registro").classList.add("hidden");
+            document.getElementById("pantalla-test").classList.add("hidden");
+            document.getElementById("pantalla-resultados").classList.add("hidden");
+            document.getElementById(id).classList.remove("hidden");
+        }
+
+        // OCULTA LA ADVERTENCIA DE CÉDULA DUPLICADA SI SE COMIENZA A ESCRIBIR DE NUEVO
+        function ocultarAlerta() {
+            document.getElementById("alerta-duplicado").classList.add("hidden");
+        }
+
+        function iniciarTest(e) {
+            e.preventDefault();
+
+            const cedulaIngresada = document.getElementById("cedula").value.trim();
+
+            // VALIDACIÓN: Comprobar si el estudiante ya completó un examen previamente
+            const estudiantePrevio = baseDatosHistorica.find(est => est.cedula === cedulaIngresada);
+            if (estudiantePrevio) {
+                document.getElementById("alerta-duplicado-mensaje").innerText = `El número de cédula "${cedulaIngresada}" correspondiente a ${estudiantePrevio.nombre} (Sección ${estudiantePrevio.seccion}) ya registró su evaluación el día ${estudiantePrevio.fecha.split(',')[0]}. No es posible repetir la prueba de forma autónoma.`;
+                document.getElementById("alerta-duplicado").classList.remove("hidden");
+                
+                // Mover scroll suave hacia arriba para que el estudiante vea con claridad la alerta
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            estudianteActual = {
+                nombre: document.getElementById("nombre").value.trim(),
+                cedula: cedulaIngresada,
+                edad: document.getElementById("edad").value,
+                seccion: document.getElementById("seccion").value,
+                fecha: new Date().toLocaleString("es-VE", { timeZone: "America/Caracas" })
+            };
+
+            respuestasEstudiante = [];
+            preguntaActualIdx = 0;
+            mostrarPantalla("pantalla-test");
+            cargarPregunta();
+            actualizarPanelMotivacional("test");
+        }
+
+        function cargarPregunta() {
+            const preg = preguntas[preguntaActualIdx];
+            const porc = Math.round(((preguntaActualIdx) / preguntas.length) * 100);
+            document.getElementById("progreso-texto").innerText = `Pregunta ${preguntaActualIdx + 1} de ${preguntas.length}`;
+            document.getElementById("progreso-porcentaje").innerText = `${porc}% Completado`;
+            document.getElementById("barra-progreso").style.width = `${porc || 8}%`;
+
+            document.getElementById("pregunta-titulo").innerText = `${preg.id}. ${preg.pregunta}`;
+
+            const contenedor = document.getElementById("opciones-contenedor");
+            contenedor.innerHTML = "";
+            preg.opciones.forEach(opcion => {
+                const boton = document.createElement("button");
+                boton.className = "w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-sky-500 hover:bg-slate-50 transition duration-250 focus:outline-none flex items-start gap-3 text-sm text-slate-700 font-medium active:scale-[0.99]";
+                boton.onclick = () => procesarRespuesta(opcion.valor);
+                boton.innerHTML = `
+                    <span class="w-5 h-5 flex items-center justify-center rounded-full bg-sky-100 text-sky-600 text-[10px] font-bold mt-0.5 shrink-0">✓</span>
+                    <span>${opcion.texto}</span>
+                `;
+                contenedor.appendChild(boton);
+            });
+        }
+
+        function procesarRespuesta(valor) {
+            respuestasEstudiante.push(valor);
+            preguntaActualIdx++;
+
+            if (preguntaActualIdx < preguntas.length) {
+                cargarPregunta();
+            } else {
+                calcularResultados();
+            }
+        }
+
+        function calcularResultados() {
+            const conteos = { enfermeria: 0, registro: 0, administracion: 0, contabilidad: 0, otros: 0 };
+            respuestasEstudiante.forEach(r => conteos[r]++);
+
+            const totalPreguntas = respuestasEstudiante.length;
+            const saludTotal = conteos.enfermeria + conteos.registro;
+            const ecoTotal = conteos.administracion + conteos.contabilidad;
+            const otrosTotal = conteos.otros;
+
+            const porcSalud = Math.round((saludTotal / totalPreguntas) * 100);
+            const porcEco = Math.round((ecoTotal / totalPreguntas) * 100);
+            const porcOtros = Math.round((otrosTotal / totalPreguntas) * 100);
+
+            let mencionDominante = "enfermeria";
+            let maxPuntaje = conteos.enfermeria;
+
+            for (const clave in conteos) {
+                if (conteos[clave] > maxPuntaje) {
+                    maxPuntaje = conteos[clave];
+                    mencionDominante = clave;
+                }
+            }
+
+            estudianteActual.porcSalud = porcSalud;
+            estudianteActual.porcEco = porcEco;
+            estudianteActual.porcOtros = porcOtros;
+            estudianteActual.mencionSugerida = perfiles[mencionDominante].titulo;
+            estudianteActual.mencionSugeridaDesc = perfiles[mencionDominante].descripcion;
+            estudianteActual.mencionDominante = mencionDominante;
+
+            baseDatosHistorica.push(estudianteActual);
+            localStorage.setItem("bd_orientacion_auxiliadora", JSON.stringify(baseDatosHistorica));
+
+            document.getElementById("resultado-nombre").innerText = estudianteActual.nombre;
+            document.getElementById("porcentaje-salud").innerText = `${porcSalud}%`;
+            document.getElementById("barra-salud").style.width = `${porcSalud}%`;
+            document.getElementById("porcentaje-economia").innerText = `${porcEco}%`;
+            document.getElementById("barra-economia").style.width = `${porcEco}%`;
+
+            const contenedorOtros = document.getElementById("diagnostico-alternativo-contenedor");
+            if (porcOtros > 0) {
+                contenedorOtros.classList.remove("hidden");
+                document.getElementById("porcentaje-otros").innerText = `${porcOtros}%`;
+                document.getElementById("barra-otros").style.width = `${porcOtros}%`;
+            } else {
+                contenedorOtros.classList.add("hidden");
+            }
+
+            const tarjeta = document.getElementById("mencion-tarjeta");
+            if (mencionDominante === 'otros') {
+                tarjeta.className = "p-5 rounded-2xl bg-blue-50/50 border-2 border-blue-200";
+            } else {
+                tarjeta.className = "p-5 rounded-2xl bg-[#f8fafc] border-2 border-sky-100";
+            }
+
+            document.getElementById("mencion-titulo").innerText = perfiles[mencionDominante].titulo;
+            document.getElementById("mencion-descripcion").innerText = perfiles[mencionDominante].descripcion;
+
+            mostrarPantalla("pantalla-resultados");
+            actualizarPanelMotivacional("resultados");
+        }
+
+        // PREPARA LOS CAMPOS DE LA PLANTILLA GENERAL DE IMPRESIÓN
+        function rellenarCamposPlantilla() {
+            document.getElementById("pdf-nombre").innerText = estudianteActual.nombre;
+            document.getElementById("pdf-cedula").innerText = estudianteActual.cedula;
+            document.getElementById("pdf-edad").innerText = estudianteActual.edad;
+            document.getElementById("pdf-seccion").innerText = estudianteActual.seccion;
+            document.getElementById("pdf-fecha").innerText = estudianteActual.fecha;
+
+            document.getElementById("pdf-porc-salud").innerText = `${estudianteActual.porcSalud}%`;
+            document.getElementById("pdf-barra-salud").style.width = `${estudianteActual.porcSalud}%`;
+            document.getElementById("pdf-porc-economia").innerText = `${estudianteActual.porcEco}%`;
+            document.getElementById("pdf-barra-economia").style.width = `${estudianteActual.porcEco}%`;
+
+            const pdfOtrosContenedor = document.getElementById("pdf-otros-contenedor");
+            if (estudianteActual.porcOtros > 0) {
+                pdfOtrosContenedor.style.display = "block";
+                document.getElementById("pdf-porc-otros").innerText = `${estudianteActual.porcOtros}%`;
+                document.getElementById("pdf-barra-otros").style.width = `${estudianteActual.porcOtros}%`;
+            } else {
+                pdfOtrosContenedor.style.display = "none";
+            }
+
+            document.getElementById("pdf-mencion-titulo").innerText = estudianteActual.mencionSugerida;
+            document.getElementById("pdf-mencion-desc").innerText = estudianteActual.mencionSugeridaDesc;
+
+            const pdfDecoracion = document.getElementById("pdf-decoracion-borde");
+            if (estudianteActual.mencionDominante === 'otros') {
+                pdfDecoracion.style.border = "2px dashed #2563eb";
+                pdfDecoracion.style.backgroundColor = "#eff6ff";
+                pdfDecoracion.style.color = "#1e3a8a";
+            } else {
+                pdfDecoracion.style.border = "2px dashed #0ea5e9";
+                pdfDecoracion.style.backgroundColor = "#f0f9ff";
+                pdfDecoracion.style.color = "#0369a1";
+            }
+        }
+
+        // ================= FUNCIÓN NUEVA: DESCARGAR REPORTE COMO IMAGEN (PNG) =================
+        function descargarReportePNG() {
+            rellenarCamposPlantilla();
+
+            const contenedor = document.getElementById("plantilla-pdf");
+            const target = document.getElementById("captura-contenedor");
+
+            // Mostrar el contenedor para la captura
+            contenedor.classList.remove("hidden");
+
+            // Generar la captura a través de html2canvas
+            html2canvas(target, {
+                scale: 2.5, // Alta resolución óptima para imprimir o ver en pantallas
+                useCORS: true,
+                logging: false,
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                // Generar el link de descarga directa de la imagen
+                const link = document.createElement("a");
+                link.download = `Reporte_Vocacional_${estudianteActual.nombre.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+
+                // Ocultar la plantilla de vuelta
+                contenedor.classList.add("hidden");
+            }).catch(err => {
+                console.error("Error al generar la imagen:", err);
+                contenedor.classList.add("hidden");
+            });
+        }
+
+        // ================= FUNCIÓN CONTINUA: DESCARGAR REPORTE COMO PDF =================
+        function generarReportePDF() {
+            rellenarCamposPlantilla();
+
+            const element = document.getElementById("plantilla-pdf");
+            element.classList.remove("hidden");
+
+            const opcionesPDF = {
+                margin:       0,
+                filename:     `Reporte_Vocacional_${estudianteActual.nombre.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2.5, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opcionesPDF).from(element).save().then(() => {
+                element.classList.add("hidden");
+            });
+        }
+
+        // ================= EXPORTACIÓN A EXCEL PARA EL DOCENTE =================
+        function descargarExcelCompleto() {
+            if (baseDatosHistorica.length === 0) {
+                alert("Aún no hay registros de estudiantes almacenados en este navegador.");
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            const filas = baseDatosHistorica.map((est, i) => ({
+                "N°": i + 1,
+                "Fecha Evaluacion": est.fecha,
+                "Nombre y Apellido": est.nombre,
+                "Cedula": est.cedula,
+                "Edad": parseInt(est.edad),
+                "Seccion": est.seccion,
+                "Afinidad Salud (%)": est.porcSalud,
+                "Afinidad Economia (%)": est.porcEco,
+                "Afinidad Otras Ramas (%)": est.porcOtros || 0,
+                "Mencion Recomendada": est.mencionSugerida
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(filas);
+
+            const objectKeys = Object.keys(filas[0]);
+            ws["!cols"] = objectKeys.map(key => ({
+                wch: Math.max(...filas.map(row => row[key] ? row[key].toString().length : 0), key.length) + 3
+            }));
+
+            XLSX.utils.book_append_sheet(wb, ws, "Base de Datos ETPMA");
+            XLSX.writeFile(wb, `BD_Orientacion_Maria_Auxiliadora.xlsx`);
+        }
+
+        function reiniciarTest() {
+            document.getElementById("formulario-registro").reset();
+            ocultarAlerta();
+            mostrarPantalla("pantalla-registro");
+            actualizarPanelMotivacional("registro");
+        }
+    </script>
+</body>
+</html>
