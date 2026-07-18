@@ -1,0 +1,40 @@
+<!-- Tabla donde se mostrarán los alumnos inscritos -->
+<div class="overflow-x-auto bg-white rounded-lg shadow-md p-6">
+    <h2 class="text-xl font-bold mb-4 text-sky-950">Estudiantes Evaluados</h2>
+    <table class="min-w-full table-auto">
+        <thead>
+            <tr class="bg-sky-900 text-white text-sm">
+                <th class="p-2">N°</th>
+                <th class="p-2">Nombre y Apellido</th>
+                <th class="p-2">Cédula</th>
+                <th class="p-2">Sección</th>
+                <th class="p-2">Mención Recomendada</th>
+            </tr>
+        </thead>
+        <tbody id="tabla-estudiantes">
+            <!-- Aquí se cargarán los datos automáticamente -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // 1. Leer la base de datos local que usa tu index.html
+    const baseDatosHistorica = JSON.parse(localStorage.getItem("baseDatosHistorica")) || [];
+    const tabla = document.getElementById("tabla-estudiantes");
+
+    // 2. Si no hay datos, mostrar un aviso
+    if (baseDatosHistorica.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Aún no hay registros de estudiantes almacenados en este navegador.</td></tr>`;
+    } else {
+        // 3. Pintar cada estudiante en la tabla automáticamente
+        tabla.innerHTML = baseDatosHistorica.map((est, i) => `
+            <tr class="border-b text-sm hover:bg-slate-50">
+                <td class="p-2 text-center font-bold">${i + 1}</td>
+                <td class="p-2">${est.nombre}</td>
+                <td class="p-2 text-center">${est.cedula}</td>
+                <td class="p-2 text-center">${est.seccion}</td>
+                <td class="p-2 text-center font-semibold text-emerald-600">${est.mencionSugerida}</td>
+            </tr>
+        `).join('');
+    }
+</script>
