@@ -1,40 +1,106 @@
-<!-- Tabla donde se mostrarán los alumnos inscritos -->
-<div class="overflow-x-auto bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-xl font-bold mb-4 text-sky-950">Estudiantes Evaluados</h2>
-    <table class="min-w-full table-auto">
-        <thead>
-            <tr class="bg-sky-900 text-white text-sm">
-                <th class="p-2">N°</th>
-                <th class="p-2">Nombre y Apellido</th>
-                <th class="p-2">Cédula</th>
-                <th class="p-2">Sección</th>
-                <th class="p-2">Mención Recomendada</th>
-            </tr>
-        </thead>
-        <tbody id="tabla-estudiantes">
-            <!-- Aquí se cargarán los datos automáticamente -->
-        </tbody>
-    </table>
-</div>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - ETPMA</title>
+    <!-- Estilos de Tailwind para que se vea hermoso -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 p-4 md:p-8">
 
-<script>
-    // 1. Leer la base de datos local que usa tu index.html
-    const baseDatosHistorica = JSON.parse(localStorage.getItem("baseDatosHistorica")) || [];
-    const tabla = document.getElementById("tabla-estudiantes");
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6 text-sky-950 border-b pb-4">📊 Panel de Control: Estudiantes Evaluados</h1>
+        
+        <!-- Alerta de Diagnóstico para saber qué está fallando -->
+        <div id="alerta-diagnostico" class="mb-6 p-4 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-800">
+            <strong>🔍 Modo Diagnóstico:</strong> Analizando la memoria del navegador...
+        </div>
 
-    // 2. Si no hay datos, mostrar un aviso
-    if (baseDatosHistorica.length === 0) {
-        tabla.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-gray-500">Aún no hay registros de estudiantes almacenados en este navegador.</td></tr>`;
-    } else {
-        // 3. Pintar cada estudiante en la tabla automáticamente
-        tabla.innerHTML = baseDatosHistorica.map((est, i) => `
-            <tr class="border-b text-sm hover:bg-slate-50">
-                <td class="p-2 text-center font-bold">${i + 1}</td>
-                <td class="p-2">${est.nombre}</td>
-                <td class="p-2 text-center">${est.cedula}</td>
-                <td class="p-2 text-center">${est.seccion}</td>
-                <td class="p-2 text-center font-semibold text-emerald-600">${est.mencionSugerida}</td>
-            </tr>
-        `).join('');
-    }
-</script>
+        <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border-collapse bg-white">
+                <thead>
+                    <tr class="bg-sky-900 text-white text-sm text-left">
+                        <th class="p-3 rounded-l-lg">N°</th>
+                        <th class="p-3">Nombre y Apellido</th>
+                        <th class="p-3">Cédula</th>
+                        <th class="p-3 text-center">Sección</th>
+                        <th class="p-3 rounded-r-lg">Mención Recomendada</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-estudiantes">
+                    <!-- Los datos se cargan aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. Revisar absolutamente TODO lo que hay en la memoria
+        const alerta = document.getElementById("alerta-diagnostico");
+        const tabla = document.getElementById("tabla-estudiantes");
+        
+        // Ver claves disponibles
+        let clavesEnMemoria = Object.keys(localStorage);
+        
+        if (clavesEnMemoria.length === 0) {
+            alerta.className = "mb-6 p-4 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800";
+            alerta.innerHTML = "<strong>⚠️ Alerta:</strong> La memoria de este navegador está totalmente vacía. Asegúrate de haber hecho el test en esta misma pestaña de incógnito o navegador normal.";
+            tabla.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-gray-400 font-medium">No hay datos que mostrar</td></tr>`;
+        } else {
+            // Intentar buscar los datos usando el nombre estándar o cualquier variante
+            let nombreClaveReal = "baseDatosHistorica";
+            
+            // Si no encuentra 'baseDatosHistorica' pero hay otra cosa guardada, la buscamos automáticamente
+            if (!localStorage.getItem(nombreClaveReal)) {
+                // Buscamos si guardaste los datos con otro nombre que contenga "estudiante", "base" o "datos"
+                const claveAlternativa = clavesEnMemoria.find(c => c.toLowerCase().includes('estudiante') || c.toLowerCase().includes('base') || c.toLowerCase().includes('data'));
+                if (claveAlternativa) {
+                    nombreClaveReal = claveAlternativa;
+                } else {
+                    nombreClaveReal = clavesEnMemoria[0]; // Usar la primera clave que encuentre por descarte
+                }
+            }
+
+            try {
+                const datosRaw = localStorage.getItem(nombreClaveReal);
+                const baseDatos = JSON.parse(datosRaw) || [];
+                
+                alerta.className = "mb-6 p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-800";
+                alerta.innerHTML = `<strong>✅ ¡Clave Encontrada!:</strong> Conectado con éxito a la variable de memoria: <span class="font-mono bg-emerald-100 px-1 rounded">${nombreClaveReal}</span>. Registros detectados: ${baseDatos.length || 1}`;
+
+                // Si es un arreglo de estudiantes (lo normal)
+                if (Array.isArray(baseDatos)) {
+                    if (baseDatos.length === 0) {
+                        tabla.innerHTML = `<tr><td colspan="5" class="text-center p-6 text-gray-400">La lista existe pero está vacía.</td></tr>`;
+                    } else {
+                        tabla.innerHTML = baseDatos.map((est, i) => `
+                            <tr class="border-b hover:bg-slate-50 transition-colors">
+                                <td class="p-3 font-bold text-slate-500">${i + 1}</td>
+                                <td class="p-3 font-semibold text-slate-800">${est.nombre || est.Nombre || 'N/A'}</td>
+                                <td class="p-3 text-slate-600">${est.cedula || est.Cedula || 'N/A'}</td>
+                                <td class="p-3 text-center text-slate-600">${est.seccion || est.Seccion || 'N/A'}</td>
+                                <td class="p-3 font-bold text-emerald-600">${est.mencionSugerida || est.mencionRecomendada || est.mencion || 'Ver en reporte'}</td>
+                            </tr>
+                        `).join('');
+                    }
+                } else {
+                    // Si solo se guardó el último estudiante como un objeto único en lugar de una lista
+                    tabla.innerHTML = `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-3 font-bold text-slate-500">1</td>
+                            <td class="p-3 font-semibold text-slate-800">${baseDatos.nombre || 'N/A'}</td>
+                            <td class="p-3 text-slate-600">${baseDatos.cedula || 'N/A'}</td>
+                            <td class="p-3 text-center text-slate-600">${baseDatos.seccion || 'N/A'}</td>
+                            <td class="p-3 font-bold text-emerald-600">${baseDatos.mencionSugerida || 'Ver en reporte'}</td>
+                        </tr>
+                    `;
+                }
+            } catch (e) {
+                alerta.className = "mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-800";
+                alerta.innerHTML = "<strong>❌ Error de lectura:</strong> Se encontraron datos pero el formato no es compatible.";
+            }
+        }
+    </script>
+</body>
+</html>
